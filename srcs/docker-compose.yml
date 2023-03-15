@@ -1,79 +1,67 @@
-version: '3'
-services:
+version: "3.3"
 
-  #########       Nginx         #############
+services:
   nginx:
-    build: 
-      context: ./requirements/nginx
-      dockerfile: Dockerfile
+    build: ./requirements/nginx/
     container_name: nginx
-    image: nginx:1337
-    restart: on-failure
+    image: nginx
+    restart: always
+    volumes:
+      - wp_volume:/var/www/html/wordpress
     depends_on:
       - wordpress
-    ports: 
+    ports:
       - "443:443"
-    volumes:
-      - type: volume
-        source: wp-volume
-        target: /var/www/html
+    env_file:
+      - .env
     networks:
-      - net
-  
-    #########       Mariadb         #############
+      - inception_network
 
   mariadb:
-    build:
-      context: ./requirements/mariadb
-      dockerfile: Dockerfile
-    image: mariadb:1337
+    build: ./requirements/mariadb/
     container_name: mariadb
-    restart: on-failure
+    image: mariadb
+    restart: always
+    expose:
+      - "3306"
+    volumes:
+      - db_volume:/var/lib/mysql/
     env_file:
       - .env
     networks:
-      - net
-    volumes:
-      - type: volume
-        source: mariadb-volume
-        target: /var/lib/mysql
-
-  #########       Wordpress         #############
+      - inception_network
 
   wordpress:
-    build:
-      context: ./requirements/wordpress
-      dockerfile: Dockerfile
-    image: wordpress:1337
+    build: ./requirements/wordpress/
     container_name: wordpress
+    image: wordpress
+    restart: always
     depends_on:
       - mariadb
-    restart: on-failure
-    ports:
-      - "9000:9000"
+    expose:
+      - "9000"
+    volumes:
+      - wp_volume:/var/www/html/wordpress
     env_file:
       - .env
-    volumes:
-      - type: volume
-        source: wp-volume
-        target: /var/www/html
     networks:
-      - net
-      
+      - inception_network
 
 volumes:
-  mariadb-volume:
+  wp_volume:
     driver: local
     driver_opts:
-      type: none
-      o: bind
-      device: /home/dohyulee/data/mariadb
-  wp-volume:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
+      type: volume
       device: /home/dohyulee/data/wordpress
-    
+      o: bind
+
+  db_volume:
+    driver: local
+    driver_opts:
+      type: volume
+      device: /home/dohyulee/data/mariadb
+      o: bind
+
 networks:
-  net:
+  inception_network:
+    driver: bridge

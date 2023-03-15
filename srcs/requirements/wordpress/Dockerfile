@@ -1,22 +1,27 @@
-FROM alpine:3.16.4
+FROM	debian:buster
 
-RUN sed -i "s/6/5/g" /etc/apk/repositories
-RUN apk add --no-cache curl php7 php7-phar php7-common php7-session php7-iconv php7-json php7-gd php7-curl php7-xml php7-mysqli php7-imap php7-cgi fcgi php7-pdo php7-pdo_mysql php7-soap php7-xmlrpc php7-posix php7-mcrypt php7-gettext php7-ldap php7-ctype php7-dom php7-simplexml php7 php7-fpm php7-opcache mariadb-client php7-tokenizer
+RUN		apt-get update -y && \
+		apt-get upgrade -y && \
+		apt-get -y install \
+		mariadb-client \
+		wget \
+		curl \
+		tar \
+		php7.3-fpm \
+		php-cli \
+		php-mysql \
+		vim \
+		sudo
 
-RUN mkdir -p /run/php/
+COPY	./tools/wordpress_setup.sh /tmp/wordpress_setup.sh
+COPY	./tools/wp-config.php /var/www/html/wordpress/wp-config.php
+COPY	./conf/www.conf /etc/php/7.3/fpm/pool.d/www.conf
 
-RUN curl -O "https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar" \
-	&& chmod +x wp-cli.phar \
-	&& mv wp-cli.phar /usr/local/bin/wp
+RUN		wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && chmod +x wp-cli.phar && mv wp-cli.phar /usr/bin/wp
 
-RUN adduser -S nginx && addgroup -S nginx
+WORKDIR	/var/www/html/wordpress
+RUN		mkdir -p /run/php
 
-COPY ./conf/php-fpm.conf /etc/php7/
+EXPOSE	9000
 
-COPY ./tools/*html /tmp
-
-COPY ./tools/script.sh /tmp
-
-
-ENTRYPOINT [ "sh","/tmp/script.sh"]
-
+ENTRYPOINT ["sh", "/tmp/wordpress_setup.sh"]

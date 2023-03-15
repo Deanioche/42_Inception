@@ -1,32 +1,33 @@
-all: up
+NAME = inception
 
-build: 
-	@docker-compose -f ./srcs/docker-compose.yml build
+all		:	$(NAME)
 
-stop:
-	@docker-compose -f ./srcs/docker-compose.yml stop
+$(NAME)	:
+	@sudo mkdir -p /home/dohyulee/data/mariadb/
+	@sudo mkdir -p /home/dohyulee/data/wordpress/
+	@sudo docker-compose -f ./srcs/docker-compose.yml up --build -d
 
-down:
-	@docker-compose -f ./srcs/docker-compose.yml down
-	sudo rm -rf /home/dohyulee/data/*
+up		:
+	@sudo docker-compose -f ./srcs/docker-compose.yml up -d
 
-up:
-	mkdir -p /home/dohyulee/data/mariadb
-	mkdir -p /home/dohyulee/data/wordpress
-	@docker-compose -f ./srcs/docker-compose.yml up -d
+down	:
+	@sudo docker-compose -f ./srcs/docker-compose.yml down
 
-fclean: down
+clean	:
+	@sudo docker-compose -f ./srcs/docker-compose.yml down --rmi all --volumes
+
+
+fclean	: clean
+	@sudo rm -rf /home/dohyulee/data
+
+re	: fclean all
+
+cc:
 	docker stop $$(docker ps -qa);					\
 	docker rm $$(docker ps -qa);					\
 	docker rmi -f $$(docker images -qa);			\
 	docker volume rm $$(docker volume ls -q);		\
-	docker network rm $$(docker network ls -q) 2> /dev/null
+	docker network rm $$(docker network ls -q);		\
+	sudo rm -rf /home/dohyulee/data
 
-clean: stop
-
-re : down all
-
-logs:
-	docker-compose -f ./srcs/docker-compose.yml logs -f
-
-.PHONY: up stop build down fclean clean all
+.PHONY	: all down clean fclean re

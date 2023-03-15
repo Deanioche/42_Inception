@@ -1,9 +1,15 @@
-FROM alpine:3.16.4
+FROM	debian:buster
 
-RUN apk add --no-cache mariadb mariadb-client openrc
-# RUN openrc && touch /run/openrc/softlevel  
+RUN		apt-get update -y && \
+		apt-get upgrade -y && \
+		apt-get -y install \
+		mariadb-server \
+		mariadb-client \
+		vim
 
-COPY ./tools/script.sh /tmp/script.sh
-COPY ./conf/my.cnf /etc/my.cnf
+COPY	./tools/mariadb_setup.sh /tmp/mariadb_setup.sh
+COPY	./conf/50-server.cnf /etc/mysql/mariadb.conf.d/
 
-ENTRYPOINT [ "sh","/tmp/script.sh" ]
+ENTRYPOINT ["sh", "/tmp/mariadb_setup.sh"]
+
+EXPOSE 3306

@@ -5,8 +5,6 @@ RUN		apt-get update -y && \
 		apt-get -y install \
 		mariadb-client \
 		wget \
-		curl \
-		tar \
 		php7.3-fpm \
 		php-cli \
 		php-mysql \
@@ -14,7 +12,7 @@ RUN		apt-get update -y && \
 		sudo
 
 COPY	./tools/wordpress_setup.sh /tmp/wordpress_setup.sh
-COPY	./tools/wp-config.php /var/www/html/wordpress/wp-config.php
+COPY	./conf/wp-config.php /var/www/html/wordpress/wp-config.php
 COPY	./conf/www.conf /etc/php/7.3/fpm/pool.d/www.conf
 
 RUN		wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && chmod +x wp-cli.phar && mv wp-cli.phar /usr/bin/wp

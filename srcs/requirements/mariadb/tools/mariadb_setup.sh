@@ -4,9 +4,9 @@ set -e
 
 MYSQL_SETUP_FILE=/var/lib/mysql/.setup
 
-service mysql start
-
 if [ ! -e $MYSQL_SETUP_FILE ]; then # 처음에만 실행되도록 하기 위해서
+
+	service mysql start
 
 	# mysql -e : mysql 에서 명령을 실행하라는 의미
 	
@@ -18,7 +18,6 @@ if [ ! -e $MYSQL_SETUP_FILE ]; then # 처음에만 실행되도록 하기 위해
 	# root 계정의 비밀번호를 변경한다.
 	mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '$MYSQL_ROOT_PASSWORD'";
 
-	# mysql $MYSQL_DATABASE -uroot -p$MYSQL_ROOT_PASSWORD
 	mysqladmin -uroot -p$MYSQL_ROOT_PASSWORD shutdown
 
 	touch $MYSQL_SETUP_FILE
